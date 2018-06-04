@@ -13,7 +13,7 @@ namespace Win10NoUp.Library.Config
         
     }
 
-    public class StopServiceActorConfiguration
+    public class StopServicesConfiguration
     {
         public int CycleInSeconds { get; set; }
         public string[] ServicesToStop { get; set; }

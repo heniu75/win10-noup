@@ -11,18 +11,18 @@ namespace Win10NoUp.Library
     {
         private readonly IFileSystem _fileSystem;
         private readonly ApplicationConfig _applicationConfig;
-        private readonly StopServiceActorConfiguration _stopServiceActorConfiguration;
+        private readonly StopServicesConfiguration _stopServicesConfiguration;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILoggingAdapter _log = Context.GetLogger();
         private IActorRef _pubSubActor;
         private IActorRef _fileCopyManager;
         private IActorRef _stopServiceActor;
 
-        public ApplicationManagerActor(IFileSystem fileSystem, ApplicationConfig applicationConfig, StopServiceActorConfiguration stopServiceActorConfiguration, ILoggerFactory loggerFactory)
+        public ApplicationManagerActor(IFileSystem fileSystem, ApplicationConfig applicationConfig, StopServicesConfiguration stopServicesConfiguration, ILoggerFactory loggerFactory)
         {
             _fileSystem = fileSystem;
             _applicationConfig = applicationConfig;
-            _stopServiceActorConfiguration = stopServiceActorConfiguration;
+            _stopServicesConfiguration = stopServicesConfiguration;
             _loggerFactory = loggerFactory;
         }
 
@@ -32,7 +32,7 @@ namespace Win10NoUp.Library
             _pubSubActor = Context.ActorOf(pubSubActorProps, "pubSubActor");
             var fileCopyManagerProps = Props.Create(() => new FileCopyManager(_fileSystem));
             _fileCopyManager = Context.ActorOf(fileCopyManagerProps, "fileCopyManager");
-            //var stopServiceActorProps = Props.Create(() => new StopServiceActor(_stopServiceActorConfiguration, _loggerFactory));
+            //var stopServiceActorProps = Props.Create(() => new StopServiceActor(_stopServicesConfiguration, _loggerFactory));
             //_stopServiceActor = Context.ActorOf(stopServiceActorProps, "stopServiceActor");
         }
 

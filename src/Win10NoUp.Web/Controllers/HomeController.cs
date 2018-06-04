@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Win10NoUp.Library.Hosts;
 
 namespace Win10NoUp.Web.Controllers
@@ -10,16 +11,19 @@ namespace Win10NoUp.Web.Controllers
         private readonly IMyAutofacTransientService _autofacTransientService;
         private readonly IMyCoreSingletonService _coreSingletonService;
         private readonly IMyCoreTransientService _coreTransientService;
+        private readonly ILogger<HomeController> _logger;
 
         public HomeController(IMyAutofacSingletonService autofacSingletonService,
             IMyAutofacTransientService autofacTransientService,
             IMyCoreSingletonService coreSingletonService,
-            IMyCoreTransientService coreTransientService)
+            IMyCoreTransientService coreTransientService,
+            ILogger<HomeController> logger)
         {
             _autofacSingletonService = autofacSingletonService;
             _autofacTransientService = autofacTransientService;
             _coreSingletonService = coreSingletonService;
             _coreTransientService = coreTransientService;
+            _logger = logger;
         }
 
         public IActionResult Index()

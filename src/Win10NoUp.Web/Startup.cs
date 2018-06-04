@@ -28,26 +28,10 @@ namespace Win10NoUp.Web
             Env = env;
         }
 
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        public IServiceProvider ConfigureServices(IServiceCollection coreServices)
         {
-            // bootstrap custom IOC and configure library services
-            SetConfigurationBindings(services);
-
-            // logging -- see https://stackoverflow.com/questions/45781873/is-net-core-2-0-logging-broken
-            // also see https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-2.1&tabs=aspnetcore2x
-            services.AddLogging(builder =>
-            {
-                builder.AddConfiguration(Configuration.GetSection("Logging"))
-                    .AddConsole()
-                    .AddDebug();
-            });
-
-            // Add controllers as services so they'll be resolved.
-            services.AddMvc().AddControllersAsServices();
-
-
-            // configure custom asp.net core 2 service bindings
-            new ConfigureCoreCoreServices().RegisterTypes(services);
+            // configure custom asp.net core 2 service bindings such as mvc, logging and configuration (e.g. options)
+            new ConfigureCoreCoreServices().RegisterTypes(coreServices, Configuration);
 
             // autofac takes over from here ...
             var containerBuilder = new ContainerBuilder();
@@ -58,7 +42,7 @@ namespace Win10NoUp.Web
             // types automatically
             // this MUST be done *after* you've configured your asp net core 2 services, else autofac
             // wont pick these up.
-            containerBuilder.Populate(services);
+            containerBuilder.Populate(coreServices);
 
             // configure autofac service bindings
             new ConfigureAutofacServices().RegisterTypes(containerBuilder);
@@ -67,23 +51,21 @@ namespace Win10NoUp.Web
             // you can override the controller registration after populating services.
             //containerBuilder.RegisterType<MyController>().PropertiesAutowired();
 
+            // ----
+            // put all new service configuration here
+            // ----
+
+            // ---- 
+
+            // setup the actor system 
             this.ActorSystemHost = new ActorSystemHost<StopServiceActor>(containerBuilder);
             this.ActorSystemHost.Start();
 
-            // by the time we get get, the containerBuilder.Build() would have yielded a container
+            // by the time we get here, the containerBuilder.Build() would have yielded a container
             this.ApplicationContainer = ActorSystemHost.Container;
             var serviceProvider = new AutofacServiceProvider(this.ApplicationContainer);
             StartupAssertions.DebugAssertIocCorrectlyConfigured(serviceProvider);
             return serviceProvider;
-        }
-        
-
-        private void SetConfigurationBindings(IServiceCollection services)
-        {
-            // I cant find the bloody extension method for encapsulating into a class into the library cs project, so keep the configuration stuff here
-            services.AddOptions();
-            services.Configure<ApplicationConfig>(Configuration.GetSection("ApplicationConfig"));
-            services.Configure<StopServiceActorConfiguration>(Configuration.GetSection("StopServiceActorConfiguration"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

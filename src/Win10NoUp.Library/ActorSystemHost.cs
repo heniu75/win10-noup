@@ -19,7 +19,7 @@
 //    public class ActorSystemHost : IActorSystemHost
 //    {
 //        private readonly IFileSystem _fileSystem;
-//        private readonly StopServiceActorConfiguration _stopServiceActorConfiguration;
+//        private readonly StopServicesConfiguration _stopServiceActorConfiguration;
 //        private readonly ILoggerFactory _loggerFactory;
 //        private readonly ApplicationConfig _applicationConfig;
 //        private ActorSystem _actorSystem;
@@ -27,7 +27,7 @@
 //        public static int idx = 0;
 //        private object lockObject = new object();
 //        private bool _initialised = false;
-//        public ActorSystemHost(IFileSystem fileSystem, IOptions<ApplicationConfig> config, IOptions<StopServiceActorConfiguration> stopServiceActorConfiguration, ILoggerFactory loggerFactory)
+//        public ActorSystemHost(IFileSystem fileSystem, IOptions<ApplicationConfig> config, IOptions<StopServicesConfiguration> stopServiceActorConfiguration, ILoggerFactory loggerFactory)
 //        {
 //            _fileSystem = fileSystem;
 //            _stopServiceActorConfiguration = stopServiceActorConfiguration.Value;

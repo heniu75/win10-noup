@@ -1,20 +1,39 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Win10NoUp.Library.Config;
 
 namespace Win10NoUp.Library.Hosts
 {
     public interface IConfigureCoreServices
     {
-        void RegisterTypes(IServiceCollection coreServices);
+        void RegisterTypes(IServiceCollection coreServices, IConfiguration configuration);
     }
 
     public class ConfigureCoreCoreServices : IConfigureCoreServices
     {
-        public void RegisterTypes(IServiceCollection coreServices)
+        public void RegisterTypes(IServiceCollection coreServices, IConfiguration configuration)
         {
+            // Add controllers as services so they'll be resolved.
+            coreServices.AddMvc().AddControllersAsServices();
+
+            // logging -- see https://stackoverflow.com/questions/45781873/is-net-core-2-0-logging-broken
+            // also see https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-2.1&tabs=aspnetcore2x
+            coreServices.AddLogging(builder =>
+            {
+                builder.AddConfiguration(configuration.GetSection("Logging"))
+                    .AddConsole()
+                    .AddDebug();
+            });
+
             // configuration
+            // I cant find the bloody extension method for encapsulating into a class into the library cs project, so keep the configuration stuff here
+            coreServices.AddOptions();
+            coreServices.Configure<ApplicationConfig>(configuration.GetSection("ApplicationConfig"));
+            coreServices.Configure<StopServicesConfiguration>(configuration.GetSection("StopServicesConfiguration"));
 
             // services
-            
+
             // test IOC configuration for runtime error detection
             coreServices.AddTransient<IMyCoreTransientService, MyCoreTransientService>();
             coreServices.AddSingleton<IMyCoreSingletonService, MyCoreSingletonService>();

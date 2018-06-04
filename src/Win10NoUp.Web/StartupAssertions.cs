@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Win10NoUp.Library;
 using Win10NoUp.Library.Hosts;
 
 namespace Win10NoUp.Web
@@ -34,6 +36,10 @@ namespace Win10NoUp.Web
             Debug.Assert(myCoreSingletonService0.MyId == 0);
             Debug.Assert(myCoreSingletonService1.MyId == 0);
             Debug.Assert(myCoreSingletonService0 == myCoreSingletonService1);
+
+            var logFactory = serviceProvider.GetService<ILoggerFactory>();
+            var logger0 = serviceProvider.GetService<ILogger<IMyAutofacTransientService>>();
+            var logger1 = serviceProvider.GetService<ILogger<StopServiceActor>>();
         }
     }
 }
