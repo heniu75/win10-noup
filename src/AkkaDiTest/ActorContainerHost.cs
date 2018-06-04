@@ -1,28 +1,30 @@
 //using System;
-//using Microsoft.Extensions.DependencyInjection;
 
-//namespace Win10NoUp.Library.Hosts
+//namespace AkkaDiTest
 //{
 //    public interface IApplicationHost
 //    {
 //        void Run();
 //    }
 
-//    public class ConsoleApplicationHost : IApplicationHost, IDisposable
+//    public class ActorContainerHost : IApplicationHost, IDisposable
 //    {
-//        private IServiceProviderFactory _factory;
+//        //private IServiceProviderFactory _factory;
+//        private IDisposable _factory;
 
-//        public ConsoleApplicationHost(IServiceProviderFactory factory)
+//        //public ActorContainerHost(IServiceProviderFactory factory)
+//        public ActorContainerHost()
 //        {
-//            _factory = factory;
+//          //  _factory = factory;
 //        }
 
 //        public void Run()
 //        {
-//            using (_factory)
+//            //using (_factory)
 //            {
 //                // the typed GetService is from an extension in NS Microsoft.Extensions.DependencyInjection;
-//                var actorsHost = _factory.ServiceProvider.GetService<IActorSystemHost>();
+//              //  var actorsHost = _factory.ServiceProvider.GetService<IActorSystemHost>();
+//                var actorsHost = new ActorSystemHost(new FileSystem());
 //                actorsHost.Start();
 //                actorsHost.Tell("Hello there!");
 //                Console.WriteLine("Press any [Enter] to close the host.");

@@ -1,33 +1,64 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ServiceProcess;
-using System.Text;
 using Akka.Actor;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Win10NoUp.Library.Config;
 using Win10NoUp.Library.Messages;
 
 namespace Win10NoUp.Library
 {
-    public class StopServiceMessage : BaseMessage { }
+    public class StopServiceMessage : BaseMessage
+    {
+        public static int Idx { get; private set; }
+        public StopServiceMessage()
+        {
+            CorrelationId = Idx++.ToString();
+        }
+    }
+
     public class StopServiceActor : ReceiveActor
     {
-        public StopServiceActor(IApplicationConfig config)
+        //public StopServiceActor(StopServiceActorConfiguration config, ILoggerFactory loggerFactory)
+        public StopServiceActor(IFileSystem fileSystem)
         {
-            Context.System.Scheduler.ScheduleTellRepeatedly(
-                TimeSpan.FromSeconds(5),
-                TimeSpan.FromSeconds(5),
-                Self,
-                new StopServiceMessage(),
-                Self);
+            Console.WriteLine("Hello");
 
-            Receive<StopServiceMessage>((m) =>
-            {
-                var servicesToStop = config.ServicesToStop;
-                ServiceController service = new ServiceController("ServiceName");
-                service.Stop();
-                service.WaitForStatus(ServiceControllerStatus.Stopped);
-            });
+        //var logger = loggerFactory.CreateLogger(this.GetType().Name);
+        //    logger.LogDebug($"In ctor()");
+        //    // get the ball rolling - note the exact same message is sent every single time here
+        //    Context.System.Scheduler.ScheduleTellRepeatedly(
+        //        TimeSpan.FromSeconds(config.CycleInSeconds), TimeSpan.FromSeconds(config.CycleInSeconds),
+        //        Self, new StopServiceMessage(), Self);
+
+        //    Receive<StopServiceMessage>((m) =>
+        //    {
+        //        logger.LogDebug($"Received StopServiceMessage {m.CorrelationId}");
+        //        foreach (var serviceToStop in config.ServicesToStop)
+        //        {
+        //            try
+        //            {
+        //                using (ServiceController service = new ServiceController(serviceToStop))
+        //                {
+        //                    if ((service.Status != ServiceControllerStatus.Stopped) && (service.Status != ServiceControllerStatus.StopPending))
+        //                    {
+        //                        logger.LogDebug($"Stopping {serviceToStop}");
+        //                        service.Stop();
+        //                        service.WaitForStatus(ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
+        //                    }
+        //                    else
+        //                    {
+        //                        logger.LogDebug($"Skipping {serviceToStop} in state {service.Status.ToString()}.");
+        //                    }
+        //                }
+        //            }
+        //            catch (Exception e)
+        //            {
+        //                logger.LogWarning($"Error stopping service {serviceToStop} - {e}");
+        //                Console.WriteLine(e);
+        //            }
+        //        }
+        //        logger.LogDebug($"Processed {m.CorrelationId}");
+        //    });
         }
     }
 }

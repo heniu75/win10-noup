@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace Win10NoUp.Library
+namespace AkkaDiTest
 {
     public interface IFileSystem
     {
@@ -9,8 +9,6 @@ namespace Win10NoUp.Library
 
     public class FileSystem : IFileSystem
     {
-        public static int Idx = 0;
-        public int MyIdx = Idx++;
         public void Copy(string sourceFile, string targetFolder, bool overwrite)
         {
             var target = Path.Combine(targetFolder, Path.GetFileName(sourceFile));

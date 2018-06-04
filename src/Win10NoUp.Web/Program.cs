@@ -23,7 +23,7 @@ namespace Win10NoUp.Web
 
             //var he = new HostingEnvironment();
             var host = WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
+                    .UseStartup<Startup>()
                 .Build();
 
             //var builder = new ConfigurationBuilder()
