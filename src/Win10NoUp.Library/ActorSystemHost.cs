@@ -1,5 +1,7 @@
 using Akka.Actor;
 using Akka.Configuration;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Win10NoUp.Library.Config;
 
 namespace Win10NoUp.Library
@@ -16,16 +18,16 @@ namespace Win10NoUp.Library
     public class ActorSystemHost : IActorSystemHost
     {
         private readonly IFileSystem _fileSystem;
-        private readonly IApplicationConfig _applicationConfig;
+        private readonly ApplicationConfig _applicationConfig;
         private ActorSystem _actorSystem;
         private IActorRef _applicationManager;
         public static int idx = 0;
         private object lockObject = new object();
         private bool _initialised = false;
-        public ActorSystemHost(IFileSystem fileSystem, IApplicationConfig applicationConfig)
+        public ActorSystemHost(IFileSystem fileSystem, IOptions<ApplicationConfig> config)
         {
             _fileSystem = fileSystem;
-            _applicationConfig = applicationConfig;
+            _applicationConfig = config.Value;
             lock (lockObject)
             {
                 idx++;

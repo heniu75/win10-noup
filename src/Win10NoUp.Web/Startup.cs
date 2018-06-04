@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Win10NoUp.Library.Config;
 
 namespace Win10NoUp.Web
 {
@@ -29,6 +30,9 @@ namespace Win10NoUp.Web
         public void ConfigureServices(IServiceCollection services)
         {
             // bootstrap custom IOC and configure library services
+            services.AddOptions();
+            services.Configure<ApplicationConfig>(Configuration);
+
             var factory = new CoreServiceProviderFactory(services, new [] { new ConfigureCoreServices() });
             var host = new WebApplicationHost(factory);
             host.Run();

@@ -4,5 +4,6 @@ namespace Win10NoUp.Library.Config
     {
         string SourceFolder { get; set; }
         string TargetFolder { get; set; }
+        string[] ServicesToStop { get; set; }
     }
 }
