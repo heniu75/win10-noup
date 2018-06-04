@@ -1,0 +1,7 @@
+$configFiles = Get-ChildItem . *.cs -rec
+foreach ($file in $configFiles)
+{
+    (Get-Content $file.PSPath) |
+    Foreach-Object { $_ -replace "Win10NoUp", "Win10NoUp" } |
+    Set-Content $file.PSPath
+}
