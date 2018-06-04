@@ -22,15 +22,16 @@ namespace Win10NoUp.Library.Hosts
             coreServices.AddLogging(builder =>
             {
                 builder.AddConfiguration(configuration.GetSection("Logging"))
-                    .AddConsole()
+                    //.AddConsole()
+                    .AddProvider(new CustomLoggerProvider(new DateTimeProvider()))
                     .AddDebug();
             });
 
             // configuration
             // I cant find the bloody extension method for encapsulating into a class into the library cs project, so keep the configuration stuff here
             coreServices.AddOptions();
-            coreServices.Configure<ApplicationConfig>(configuration.GetSection("ApplicationConfig"));
-            coreServices.Configure<StopServicesConfiguration>(configuration.GetSection("StopServicesConfiguration"));
+            coreServices.Configure<ApplicationConfig>(configuration.GetSection($"{nameof(ApplicationConfig)}"));
+            coreServices.Configure<StopServicesConfiguration>(configuration.GetSection($"{nameof(StopServicesConfiguration)}"));
 
             // services
 

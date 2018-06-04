@@ -19,7 +19,6 @@ namespace Win10NoUp.Library
 
     public class StopServiceActor : ReceiveActor
     {
-        //public StopServiceActor(StopServicesConfiguration config, ILoggerFactory loggerFactory)
         public StopServiceActor(IOptions<StopServicesConfiguration> options, ILogger<StopServiceActor> logger)
         {
             Console.WriteLine("Hello");

@@ -5,20 +5,17 @@ namespace Win10NoUp.Library.Reflection
 {
     public class AllTypes<T> where T : class
     {
-        protected List<Type> _Types;
-        public AllTypes()
-        {
-        }
+        private List<Type> _types;
 
         public List<Type> Types
         {
-            get { Init(); return _Types; }
+            get { Init(); return _types; }
         }
 
         private void Init()
         {
-            if (_Types == null)
-                _Types = ReflectionUtil.GetImplementingTypes<T>();
+            if (_types == null)
+                _types = ReflectionUtil.GetImplementingTypes<T>();
         }
     }
 }

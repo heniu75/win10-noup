@@ -23,7 +23,7 @@ namespace Win10NoUp.Library.Actions
         public int OffsetInSeconds { get; }
         public int CycleInSeconds { get; }
 
-        public void Execute(RepeatMessage message, ILogger logger)
+        public void Execute()
         {
             foreach (var serviceToStop in _options.Value.ServicesToStop)
             {
@@ -33,19 +33,19 @@ namespace Win10NoUp.Library.Actions
                     {
                         if ((service.Status != ServiceControllerStatus.Stopped) && (service.Status != ServiceControllerStatus.StopPending))
                         {
-                            logger.LogDebug($"Stopping {serviceToStop}");
+                            _logger.LogDebug($"Stopping {serviceToStop}");
                             service.Stop();
                             service.WaitForStatus(ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
                         }
                         else
                         {
-                            logger.LogDebug($"Skipping {serviceToStop} in state {service.Status.ToString()}.");
+                            _logger.LogDebug($"Skipping {serviceToStop} in state {service.Status.ToString()}.");
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    logger.LogWarning($"Error stopping service {serviceToStop} - {e}");
+                    _logger.LogWarning($"Error stopping service {serviceToStop} - {e}");
                     Console.WriteLine(e);
                 }
             }

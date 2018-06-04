@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Autofac;
+using Win10NoUp.Library;
+using Win10NoUp.Library.Actions;
 using Win10NoUp.Library.Hosts;
 using Win10NoUp.Library.Reflection;
 using Xunit;
@@ -58,7 +60,6 @@ namespace Win10NoUp.Tests
         public void Autofac_can_instantiate_registered_classes_from_AllTypes_at_run_time()
         {
             var container = new ContainerBuilder();
-
             container.RegisterGeneric(typeof(AllTypes<>)).AsSelf();
             container.RegisterType<ClassA>();
             container.RegisterType<ClassB>();
@@ -81,7 +82,6 @@ namespace Win10NoUp.Tests
         public void Autofac_can_enable_allInstances_type_to_resolve_registered_classes_at_run_time()
         {
             var container = new ContainerBuilder();
-
             container.RegisterGeneric(typeof(AllTypes<>)).AsSelf();
             container.RegisterGeneric(typeof(AllInstances<>)).AsSelf();
             container.RegisterType<ClassA>();
@@ -98,9 +98,53 @@ namespace Win10NoUp.Tests
 
             using (var provider = container.Build())
             {
-
                 var allInstances1 = provider.Resolve<AllInstances<testInterfaceA>>();
                 var instances = allInstances1.Instances;
+                Assert.Equal(2, instances.Count());
+                Assert.Contains(instances, x => x.GetType().Name == "ClassA");
+                Assert.Contains(instances, x => x.GetType().Name == "ClassB");
+            }
+        }
+
+        public class MyTestInterfaceACollection
+        {
+            public MyTestInterfaceACollection(AllTypeInstances<testInterfaceA> typeInstances)
+            {
+                Types = typeInstances.Types;
+                Instances = typeInstances.Instances;
+            }
+            public IList<testInterfaceA> Instances { get; private set; }
+            public IList<Type> Types { get; private set; }
+        }
+
+        [Fact]
+        public void Confirm()
+        {
+            var container = new ContainerBuilder();
+            container.RegisterGeneric(typeof(AllTypes<>)).AsSelf();
+            container.RegisterGeneric(typeof(AllInstances<>)).AsSelf();
+            container.RegisterGeneric(typeof(AllTypeInstances<>)).AsSelf();
+            container.RegisterType<ClassA>();
+            container.RegisterType<ClassB>();
+            container.Register<Func<Type, object>>((c, p) =>
+            {
+                // see https://stackoverflow.com/questions/20583339/autofac-and-func-factories
+                var context = c.Resolve<IComponentContext>();
+                return (Type type) =>
+                {
+                    return context.Resolve(type);
+                };
+            });
+            container.RegisterType<MyTestInterfaceACollection>();
+
+            using (var provider = container.Build())
+            {
+                var collection = provider.Resolve<MyTestInterfaceACollection>();
+                var types = collection.Types;
+                Assert.Equal(2, types.Count());
+                Assert.Contains(types, x => x.Name == "ClassA");
+                Assert.Contains(types, x => x.Name == "ClassB");
+                var instances = collection.Instances;
                 Assert.Equal(2, instances.Count());
                 Assert.Contains(instances, x => x.GetType().Name == "ClassA");
                 Assert.Contains(instances, x => x.GetType().Name == "ClassB");

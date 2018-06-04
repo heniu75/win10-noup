@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ServiceProcess;
-using System.Text;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Win10NoUp.Library.Config;
 using Win10NoUp.Library.Hosts;
 
 namespace Win10NoUp.Library.Actions
@@ -13,8 +8,10 @@ namespace Win10NoUp.Library.Actions
     {
         private readonly ILogger<NoOpAction> _logger;
 
-        public NoOpAction(Func<MyAutofacTransientService> myFactory)
+        public NoOpAction(Func<MyAutofacTransientService> myFactory,
+            ILogger<NoOpAction> logger)
         {
+            _logger = logger;
             var x = myFactory();
             Console.WriteLine(x.MyId);
         }
@@ -22,9 +19,9 @@ namespace Win10NoUp.Library.Actions
         public int OffsetInSeconds { get; }
         public int CycleInSeconds { get; }
 
-        public void Execute(RepeatMessage message, ILogger logger)
+        public void Execute()
         {
-           // _logger("Hello from no-op");
+           _logger.LogDebug("Hello from no-op");
         }
     }
 }
