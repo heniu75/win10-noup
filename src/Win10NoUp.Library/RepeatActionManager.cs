@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ServiceProcess;
 using Akka.Actor;
+using Akka.DI.Core;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Win10NoUp.Library.Actions;
-using Win10NoUp.Library.Config;
-using Win10NoUp.Library.FileCopy;
 using Win10NoUp.Library.Messages;
 using Win10NoUp.Library.Reflection;
 
@@ -14,20 +11,22 @@ namespace Win10NoUp.Library
 {
     public class RepeatMessage : BaseMessage
     {
+        public IRepeatAction RepeatAction { get; private set; }
         public static int Idx { get; private set; }
-        public RepeatMessage()
+        public RepeatMessage(IRepeatAction repeatAction)
         {
+            RepeatAction = repeatAction;
             CorrelationId = Idx++.ToString();
         }
     }
 
     public class RepeatActionWorker : ReceiveActor
     {
-        public RepeatActionWorker(IRepeatAction repeatAction)
+        public RepeatActionWorker()
         {
-            Receive<RepeatMessage>((m) =>
+            Receive<RepeatMessage>((msg) =>
             {
-                repeatAction.Execute();
+                msg.RepeatAction.Execute();
             });
         }
     }
@@ -35,8 +34,7 @@ namespace Win10NoUp.Library
     public class RepeatActionManager : ReceiveActor
     {
         public RepeatActionManager(ILogger<RepeatActionManager> logger,
-            AllTypeInstances<IRepeatAction> repeatActions,
-            Func<Type, ActorBase> activator)
+            AllTypeInstances<IRepeatAction> repeatActions)
         {
             logger.LogDebug($"In ctor()");
 
@@ -44,16 +42,11 @@ namespace Win10NoUp.Library
             int idx = 0;
             foreach (var action in repeatActions.Instances)
             {
-                var workerActorProps = Props.Create(() => new RepeatActionWorker(action));
-                var workerActor = Context.ActorOf(workerActorProps, $"repeatActionWorker-{idx++}");
-                children.Add(workerActor);
-            }
-
-            foreach (var action in repeatActions.Instances)
-            {
+                var workerActor = Context.ActorOf(Context.DI().Props<RepeatActionWorker>(), $"{nameof(RepeatActionWorker)}-{idx++}");
                 Context.System.Scheduler.ScheduleTellRepeatedly(
                     TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30),
-                    Self, new RepeatMessage(), Self);
+                    workerActor, new RepeatMessage(action), Self);
+                children.Add(workerActor);
             }
         }
     }

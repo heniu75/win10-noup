@@ -8,12 +8,9 @@ namespace Win10NoUp.Library.Actions
     {
         private readonly ILogger<NoOpAction> _logger;
 
-        public NoOpAction(Func<MyAutofacTransientService> myFactory,
-            ILogger<NoOpAction> logger)
+        public NoOpAction(ILogger<NoOpAction> logger)
         {
             _logger = logger;
-            var x = myFactory();
-            Console.WriteLine(x.MyId);
         }
 
         public int OffsetInSeconds { get; }

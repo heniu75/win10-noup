@@ -3,12 +3,7 @@ using Win10NoUp.Library.Messages;
 
 namespace Win10NoUp.Library
 {
-    public abstract class IPubSubActor : ReceiveActor
-    {
-
-    }
-
-    public class PubSubActor : IPubSubActor
+    public class PubSubActor : ReceiveActor
     {
         private readonly EventDictionary _subscribers = new EventDictionary();
         public PubSubActor()

@@ -58,7 +58,7 @@ namespace Win10NoUp.Web
             // ---- 
 
             // setup the actor system 
-            this.ActorSystemHost = new ActorSystemHost<StopServiceActor>(containerBuilder);
+            this.ActorSystemHost = new ActorSystemHost<ApplicationManagerActor>(containerBuilder);
             this.ActorSystemHost.Start();
 
             // by the time we get here, the containerBuilder.Build() would have yielded a container

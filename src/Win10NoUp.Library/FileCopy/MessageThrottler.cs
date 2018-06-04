@@ -11,19 +11,40 @@ namespace Win10NoUp.Library.FileCopy
         Ignore,
     }
 
+    public class ConfigureMessageThrottling : BaseMessage
+    {
+        public ConfigureMessageThrottling(IActorRef sendTo, Func<object, ThrottleDirection> getThrottleDirection)
+        {
+            SendTo = sendTo;
+            GetThrottleDirection = getThrottleDirection;
+        }
+        public IActorRef SendTo { get; set; }
+        public Func<object, ThrottleDirection> GetThrottleDirection { get; set; }
+    }
+
     public class MessageThrottler : ReceiveActor, IWithUnboundedStash
     {
         private const int MaxMessages = 4;
         public IStash Stash { get; set; }
 
-        public MessageThrottler(IActorRef sendTo, Func<object, ThrottleDirection> getThrottleDirection)
+        private ConfigureMessageThrottling _configuration = null;
+        //public MessageThrottler(IActorRef sendTo, Func<object, ThrottleDirection> getThrottleDirection)
+        public MessageThrottler()
         {
             int messagesInFlight = 0;
             ActorCorrelations correlations = new ActorCorrelations();
 
+            Receive<ConfigureMessageThrottling>((m) => { _configuration = m; });
             Receive<BaseMessage>((msg) =>
             {
-                var instruction = getThrottleDirection(msg);
+                if (_configuration == null)
+                {
+                    Stash.Stash();
+                    return;
+                }
+                Stash.UnstashAll();
+
+                var instruction = _configuration.GetThrottleDirection(msg);
                 switch (instruction)
                 {
                     case ThrottleDirection.Outbound:
@@ -34,7 +55,7 @@ namespace Win10NoUp.Library.FileCopy
                         }
                         messagesInFlight++;
                         correlations.Add(msg.CorrelationId, Sender);
-                        sendTo.Tell(msg, Self);
+                        _configuration.SendTo.Tell(msg, Self);
                         break;
                     case ThrottleDirection.Inbound:
                         var requestor = correlations[msg.CorrelationId];

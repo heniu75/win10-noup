@@ -1,15 +1,12 @@
 using System;
 using Akka.Actor;
+using Akka.DI.Core;
 using Akka.Routing;
 using Win10NoUp.Library.Messages;
 
 namespace Win10NoUp.Library.FileCopy
 {
-    public abstract class IFileCopyManager : ReceiveActor
-    {
-    }
-
-    public class FileCopyManager : IFileCopyManager
+    public class FileCopyManager : ReceiveActor
     {
         private readonly IActorRef _workerRouter;
         private readonly IActorRef _messageThrottler;
@@ -20,7 +17,7 @@ namespace Win10NoUp.Library.FileCopy
         public FileCopyManager(IFileSystem fileSystem)
         {
             var workerProps = Props.Create(() => new FileCopyActor(fileSystem))
-                .WithRouter(new SmallestMailboxPool(NumberOfWorkers));
+             .WithRouter(new SmallestMailboxPool(NumberOfWorkers));
             _workerRouter = Context.ActorOf(workerProps, "workers");
 
             Func<object, ThrottleDirection> getMessageDirection = (msg) =>
@@ -31,8 +28,11 @@ namespace Win10NoUp.Library.FileCopy
                 return ThrottleDirection.Ignore;
             };
 
-            var throttlerProps = Props.Create(() => new MessageThrottler(_workerRouter, getMessageDirection));
-            _messageThrottler = Context.ActorOf(throttlerProps, $"{nameof(MessageThrottler)}-0");
+            //var throttlerProps = Props.Create(() => new MessageThrottler(_workerRouter, getMessageDirection));
+            //_messageThrottler = Context.ActorOf(throttlerProps, $"{nameof(MessageThrottler)}-0");
+
+            _messageThrottler = Context.ActorOf(Context.DI().Props<MessageThrottler>(), $"{nameof(MessageThrottler)}-0");
+            _messageThrottler.Tell(new ConfigureMessageThrottling(_workerRouter, getMessageDirection));
 
             Receive<FileCopyMessage>((m) =>
             {

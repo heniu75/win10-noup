@@ -1,6 +1,8 @@
 ﻿using System;
 using Akka.Actor;
 using Autofac;
+using Win10NoUp.Library.Actions;
+using Win10NoUp.Library.FileCopy;
 using Win10NoUp.Library.Reflection;
 
 namespace Win10NoUp.Library.Hosts
@@ -15,7 +17,6 @@ namespace Win10NoUp.Library.Hosts
         public void RegisterTypes(ContainerBuilder containerBuilder)
         {
             containerBuilder.RegisterType<FileSystem>().As<IFileSystem>().SingleInstance();
-            containerBuilder.RegisterType<StopServiceActor>().SingleInstance();
 
             containerBuilder.RegisterGeneric(typeof(AllTypes<>)).AsSelf();
             containerBuilder.RegisterGeneric(typeof(AllInstances<>)).AsSelf();
@@ -36,6 +37,20 @@ namespace Win10NoUp.Library.Hosts
             // test IOC configuration for runtime error detection
             containerBuilder.RegisterType<MyAutofacTransientService>().As<IMyAutofacTransientService>();
             containerBuilder.RegisterType<MyAutofacSingletonService>().As<IMyAutofacSingletonService>().SingleInstance();
+
+            // actors
+            containerBuilder.RegisterType<ApplicationManagerActor>().SingleInstance();
+            containerBuilder.RegisterType<PubSubActor>().SingleInstance();
+            containerBuilder.RegisterType<FileCopyManager>().SingleInstance();
+            containerBuilder.RegisterType<FileCopyActor>();
+            containerBuilder.RegisterType<StopServiceActor>().SingleInstance();
+            containerBuilder.RegisterType<MessageThrottler>();
+            containerBuilder.RegisterType<RepeatActionManager>();
+            containerBuilder.RegisterType<RepeatActionWorker>();
+
+            //actions
+            containerBuilder.RegisterType<NoOpAction>();
+            containerBuilder.RegisterType<StopServicesAction>();
 
             //containerBuilder.Register()
             //containerBuilder.Register<IConnection>((c, p) =>
