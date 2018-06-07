@@ -1,8 +1,5 @@
-using System.IO;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.Internal;
-using Microsoft.Extensions.Configuration;
 
 namespace Win10NoUp.Web
 {

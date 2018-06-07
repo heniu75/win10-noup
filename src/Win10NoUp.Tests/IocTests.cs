@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Autofac;
-using Win10NoUp.Library;
-using Win10NoUp.Library.Actions;
 using Win10NoUp.Library.Hosts;
 using Win10NoUp.Library.Reflection;
 using Xunit;

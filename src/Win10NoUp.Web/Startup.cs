@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Win10NoUp.Library;
@@ -9,9 +8,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Win10NoUp.Library.Config;
 
 namespace Win10NoUp.Web
 {

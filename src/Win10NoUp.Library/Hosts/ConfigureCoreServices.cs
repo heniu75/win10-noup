@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Win10NoUp.Library.Config;
 
 namespace Win10NoUp.Library.Hosts
 {
@@ -30,8 +29,7 @@ namespace Win10NoUp.Library.Hosts
             // configuration
             // I cant find the bloody extension method for encapsulating into a class into the library cs project, so keep the configuration stuff here
             coreServices.AddOptions();
-            coreServices.Configure<ApplicationConfig>(configuration.GetSection($"{nameof(ApplicationConfig)}"));
-            coreServices.Configure<StopServicesConfiguration>(configuration.GetSection($"{nameof(StopServicesConfiguration)}"));
+            new AutoConfiguration().AddAutoConfiguration(coreServices, configuration);
 
             // services
 

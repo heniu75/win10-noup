@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Win10NoUp.Library.Config;
 using Win10NoUp.Library.Messages;
+using Win10NoUp.Library.ServiceControl;
 
 namespace Win10NoUp.Library
 {
@@ -19,7 +20,9 @@ namespace Win10NoUp.Library
 
     public class StopServiceActor : ReceiveActor
     {
-        public StopServiceActor(IOptions<StopServicesConfiguration> options, ILogger<StopServiceActor> logger)
+        public StopServiceActor(IOptions<StopServicesConfiguration> options, 
+            ILogger<StopServiceActor> logger, 
+            IServiceControllerService serviceControllerService)
         {
             Console.WriteLine("Hello");
 
@@ -27,7 +30,7 @@ namespace Win10NoUp.Library
             logger.LogDebug($"In ctor()");
             // get the ball rolling - note the exact same message is sent every single time here
             Context.System.Scheduler.ScheduleTellRepeatedly(
-                TimeSpan.FromSeconds(options.Value.CycleInSeconds), TimeSpan.FromSeconds(options.Value.CycleInSeconds),
+                TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30),
                 Self, new StopServiceMessage(), Self);
 
             Receive<StopServiceMessage>((m) =>
@@ -37,19 +40,7 @@ namespace Win10NoUp.Library
                 {
                     try
                     {
-                        using (ServiceController service = new ServiceController(serviceToStop))
-                        {
-                            if ((service.Status != ServiceControllerStatus.Stopped) && (service.Status != ServiceControllerStatus.StopPending))
-                            {
-                                logger.LogDebug($"Stopping {serviceToStop}");
-                                service.Stop();
-                                service.WaitForStatus(ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
-                            }
-                            else
-                            {
-                                logger.LogDebug($"Skipping {serviceToStop} in state {service.Status.ToString()}.");
-                            }
-                        }
+                        serviceControllerService.Stop(serviceToStop.ServiceName);
                     }
                     catch (Exception e)
                     {

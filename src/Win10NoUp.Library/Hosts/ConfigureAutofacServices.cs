@@ -1,9 +1,9 @@
 ﻿using System;
-using Akka.Actor;
 using Autofac;
 using Win10NoUp.Library.Actions;
 using Win10NoUp.Library.FileCopy;
 using Win10NoUp.Library.Reflection;
+using Win10NoUp.Library.ServiceControl;
 
 namespace Win10NoUp.Library.Hosts
 {
@@ -17,6 +17,7 @@ namespace Win10NoUp.Library.Hosts
         public void RegisterTypes(ContainerBuilder containerBuilder)
         {
             containerBuilder.RegisterType<FileSystem>().As<IFileSystem>().SingleInstance();
+            containerBuilder.RegisterType<ServiceControllerService>().As<IServiceControllerService>().SingleInstance();
 
             containerBuilder.RegisterGeneric(typeof(AllTypes<>)).AsSelf();
             containerBuilder.RegisterGeneric(typeof(AllInstances<>)).AsSelf();

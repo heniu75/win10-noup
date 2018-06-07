@@ -1,11 +1,14 @@
-﻿using Microsoft.Extensions.Logging;
-
-namespace Win10NoUp.Library.Actions
+﻿namespace Win10NoUp.Library.Actions
 {
-    public interface IRepeatAction
+    public interface IRepeatingAction
     {
-        int OffsetInSeconds { get; }
+        string ActionName { get; }
         int CycleInSeconds { get; }
         void Execute();
+    }
+
+    public interface IRepeatAction
+    {
+        IRepeatingAction[] RepeatingActions { get; }
     }
 }

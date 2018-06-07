@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ServiceProcess;
-using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Win10NoUp.Library.Config;
+using Win10NoUp.Library.ServiceControl;
 
 namespace Win10NoUp.Library.Actions
 {
@@ -12,16 +11,18 @@ namespace Win10NoUp.Library.Actions
     {
         private readonly IOptions<StopServicesConfiguration> _options;
         private readonly ILogger<StopServicesAction> _logger;
+        private readonly IServiceControllerService _serviceControllerService;
 
         public StopServicesAction(IOptions<StopServicesConfiguration> options,
-            ILogger<StopServicesAction> logger)
+            ILogger<StopServicesAction> logger,
+            IServiceControllerService serviceControllerService)
         {
             _options = options;
             _logger = logger;
+            _serviceControllerService = serviceControllerService;
         }
 
-        public int OffsetInSeconds { get; }
-        public int CycleInSeconds { get; }
+        public int CycleInSeconds => 0; //_options.Value.
 
         public void Execute()
         {
@@ -29,19 +30,7 @@ namespace Win10NoUp.Library.Actions
             {
                 try
                 {
-                    using (ServiceController service = new ServiceController(serviceToStop))
-                    {
-                        if ((service.Status != ServiceControllerStatus.Stopped) && (service.Status != ServiceControllerStatus.StopPending))
-                        {
-                            _logger.LogDebug($"Stopping {serviceToStop}");
-                            service.Stop();
-                            service.WaitForStatus(ServiceControllerStatus.Stopped, new TimeSpan(0, 0, 30));
-                        }
-                        else
-                        {
-                            _logger.LogDebug($"Skipping {serviceToStop} in state {service.Status.ToString()}.");
-                        }
-                    }
+                    _serviceControllerService.Stop(serviceToStop.ServiceName);
                 }
                 catch (Exception e)
                 {
@@ -50,5 +39,7 @@ namespace Win10NoUp.Library.Actions
                 }
             }
         }
+
+        public IRepeatingAction[] RepeatingActions { get; }
     }
 }

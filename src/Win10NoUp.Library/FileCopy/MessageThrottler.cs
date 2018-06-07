@@ -1,5 +1,6 @@
 using System;
 using Akka.Actor;
+using Microsoft.Extensions.Options;
 using Win10NoUp.Library.Messages;
 
 namespace Win10NoUp.Library.FileCopy
@@ -22,6 +23,11 @@ namespace Win10NoUp.Library.FileCopy
         public Func<object, ThrottleDirection> GetThrottleDirection { get; set; }
     }
 
+    public class MessageThrottlerOptionsConfig
+    {
+
+    }
+
     public class MessageThrottler : ReceiveActor, IWithUnboundedStash
     {
         private const int MaxMessages = 4;
@@ -29,7 +35,7 @@ namespace Win10NoUp.Library.FileCopy
 
         private ConfigureMessageThrottling _configuration = null;
         //public MessageThrottler(IActorRef sendTo, Func<object, ThrottleDirection> getThrottleDirection)
-        public MessageThrottler()
+        public MessageThrottler(IOptions<MessageThrottlerOptionsConfig> config)
         {
             int messagesInFlight = 0;
             ActorCorrelations correlations = new ActorCorrelations();

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using Akka.Actor;
 using Akka.DI.Core;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Win10NoUp.Library.Actions;
+using Win10NoUp.Library.Attributes;
 using Win10NoUp.Library.Messages;
 using Win10NoUp.Library.Reflection;
 
@@ -11,11 +13,11 @@ namespace Win10NoUp.Library
 {
     public class RepeatMessage : BaseMessage
     {
-        public IRepeatAction RepeatAction { get; private set; }
+        public IRepeatingAction RepeatingAction { get; private set; }
         public static int Idx { get; private set; }
-        public RepeatMessage(IRepeatAction repeatAction)
+        public RepeatMessage(IRepeatingAction repeatAction)
         {
-            RepeatAction = repeatAction;
+            RepeatingAction = repeatAction;
             CorrelationId = Idx++.ToString();
         }
     }
@@ -24,29 +26,50 @@ namespace Win10NoUp.Library
     {
         public RepeatActionWorker()
         {
+            RepeatMessage repeatMessage = null;
             Receive<RepeatMessage>((msg) =>
             {
-                msg.RepeatAction.Execute();
+                msg.RepeatingAction.Execute();
+                if (repeatMessage == null)
+                    repeatMessage = new RepeatMessage(msg.RepeatingAction);
+                Context.System.Scheduler.ScheduleTellOnce(
+                    TimeSpan.FromSeconds(repeatMessage.RepeatingAction.CycleInSeconds),
+                    Self, repeatMessage, Self);
             });
         }
+    }
+
+    [AutoConfigurationDto]
+    public class RepeatActionManagerConfig
+    {
+        public RepeatActionManagerConfig()
+        {
+            StartupDelayInSeconds = 10;
+        }
+
+        public int StartupDelayInSeconds { get; set; }
     }
 
     public class RepeatActionManager : ReceiveActor
     {
         public RepeatActionManager(ILogger<RepeatActionManager> logger,
-            AllTypeInstances<IRepeatAction> repeatActions)
+            IOptions<RepeatActionManagerConfig> config, AllTypeInstances<IRepeatAction> repeatActions)
         {
             logger.LogDebug($"In ctor()");
 
             var children = new List<IActorRef>();
             int idx = 0;
-            foreach (var action in repeatActions.Instances)
+            foreach (var instance in repeatActions.Instances)
             {
-                var workerActor = Context.ActorOf(Context.DI().Props<RepeatActionWorker>(), $"{nameof(RepeatActionWorker)}-{idx++}");
-                Context.System.Scheduler.ScheduleTellRepeatedly(
-                    TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30),
-                    workerActor, new RepeatMessage(action), Self);
-                children.Add(workerActor);
+                foreach (var action in instance.RepeatingActions)
+                {
+                    var workerActor = Context.ActorOf(Context.DI().Props<RepeatActionWorker>(),
+                        $"{nameof(RepeatActionWorker)}-{action.ActionName}{idx++}");
+                    Context.System.Scheduler.ScheduleTellOnce(
+                        TimeSpan.FromSeconds(config.Value.StartupDelayInSeconds),
+                        workerActor, new RepeatMessage(action), Self);
+                    children.Add(workerActor);
+                }
             }
         }
     }
